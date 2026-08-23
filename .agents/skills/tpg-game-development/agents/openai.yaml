@@ -1,0 +1,4 @@
+interface:
+  display_name: "TP Games Development"
+  short_description: "Build and test host-authoritative TP Games"
+  default_prompt: "Use $tpg-game-development to build and verify this TP Games project."

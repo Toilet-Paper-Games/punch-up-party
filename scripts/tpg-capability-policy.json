@@ -1,0 +1,95 @@
+{
+  "docsUrl": "https://tp.games/docs/capabilities",
+  "participants": {
+    "supportedMinimum": 2,
+    "supportedMaximum": 8,
+    "experimentalMaximum": 16
+  },
+  "reservedCapabilities": {
+    "tpg:reliable-messaging": {
+      "status": "supported",
+      "description": "Reliable ordered room messaging.",
+      "trackingIssues": []
+    },
+    "tpg:shared-state": {
+      "status": "supported",
+      "description": "Host-authoritative canonical shared state.",
+      "trackingIssues": []
+    },
+    "tpg:player-state": {
+      "status": "supported",
+      "description": "Participant-scoped state.",
+      "trackingIssues": []
+    },
+    "tpg:spectators": {
+      "status": "supported",
+      "description": "Manifest-declared spectator surfaces.",
+      "trackingIssues": []
+    },
+    "tpg:casual-real-time": {
+      "status": "experimental",
+      "description": "Latest-value delivery and public fixed-step simulation helpers support measured small-room prototypes.",
+      "trackingIssues": [
+        "https://github.com/Toilet-Paper-Games/Toilet-Paper-Games/issues/414",
+        "https://github.com/Toilet-Paper-Games/Toilet-Paper-Games/issues/415"
+      ]
+    },
+    "tpg:unreliable-messaging": {
+      "status": "experimental",
+      "description": "Latest-value semantics are emulated over reliable transports; native packet-loss delivery is not available.",
+      "trackingIssues": [
+        "https://github.com/Toilet-Paper-Games/Toilet-Paper-Games/issues/414"
+      ]
+    },
+    "tpg:durable-sessions": {
+      "status": "experimental",
+      "description": "A bounded asynchronous relay reference has revisioned server authority, participant resume credentials, timers, retention, and Cloudflare Durable Object persistence; arbitrary creator-defined durable logic is not yet available.",
+      "trackingIssues": [
+        "https://github.com/Toilet-Paper-Games/Toilet-Paper-Games/issues/417"
+      ]
+    },
+    "tpg:camera": {
+      "status": "supported",
+      "description": "Published manifests can request camera access; the browser still requires user permission.",
+      "trackingIssues": []
+    },
+    "tpg:microphone": {
+      "status": "supported",
+      "description": "Published manifests can request microphone access; the browser still requires user permission.",
+      "trackingIssues": []
+    },
+    "tpg:pointer-lock": {
+      "status": "supported",
+      "description": "Published manifests can grant pointer lock to game frames.",
+      "trackingIssues": []
+    },
+    "tpg:fullscreen": {
+      "status": "supported",
+      "description": "Published manifests can grant fullscreen to game frames.",
+      "trackingIssues": []
+    },
+    "tpg:gamepad": {
+      "status": "supported",
+      "description": "Published manifests can grant the Gamepad API to game frames.",
+      "trackingIssues": []
+    },
+    "tpg:webxr": {
+      "status": "planned",
+      "description": "WebXR is not granted by the reviewed frame policy.",
+      "trackingIssues": []
+    },
+    "tpg:downloads": {
+      "status": "unsupported",
+      "description": "Game-initiated downloads are denied by the frame sandbox.",
+      "trackingIssues": []
+    },
+    "tpg:large-session": {
+      "status": "planned",
+      "description": "Rooms above 16 interactive participants are not supported.",
+      "trackingIssues": [
+        "https://github.com/Toilet-Paper-Games/Toilet-Paper-Games/issues/414",
+        "https://github.com/Toilet-Paper-Games/Toilet-Paper-Games/issues/417"
+      ]
+    }
+  }
+}

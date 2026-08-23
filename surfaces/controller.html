@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TPG Starter Controller</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+        background: #e7f7ff;
+        color: #14212b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+      }
+
+      main {
+        width: min(420px, 100%);
+        border: 3px solid #14212b;
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 22px;
+        box-shadow: 7px 7px 0 #75d7c8;
+      }
+
+      h1,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 2.2rem;
+        line-height: 1;
+      }
+
+      .player {
+        margin-top: 8px;
+        font-weight: 800;
+      }
+
+      .prompt {
+        margin-top: 18px;
+        border: 2px solid #14212b;
+        border-radius: 8px;
+        background: #fff275;
+        padding: 12px;
+        font-weight: 800;
+      }
+
+      .meta {
+        margin-top: 12px;
+        color: #43515d;
+        font-weight: 700;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 52px;
+        border: 3px solid #14212b;
+        border-radius: 10px;
+        background: #ff7a59;
+        color: #14212b;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 900;
+      }
+
+      button.secondary {
+        width: 100%;
+        margin-top: 10px;
+        background: #ffffff;
+      }
+
+      .status {
+        min-height: 1.4em;
+        margin-top: 12px;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Starter Controller</h1>
+      <p id="player" class="player">Controller</p>
+      <p id="prompt" class="prompt">Waiting for the host to start.</p>
+      <p id="lifecycle" class="meta">Lifecycle: loading</p>
+
+      <div class="actions">
+        <button id="ready" type="button">Ready</button>
+        <button id="wild" type="button">Wild</button>
+        <button id="stuck" type="button">Stuck</button>
+      </div>
+      <button id="settings" class="secondary" type="button">Settings</button>
+      <p id="status" class="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="../src/controller.ts"></script>
+  </body>
+</html>

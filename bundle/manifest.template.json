@@ -1,0 +1,55 @@
+{
+  "manifestVersion": "1",
+  "gameId": "punch-up-party",
+  "version": "0.1.0",
+  "sdkVersion": "1.0.0",
+  "title": "Punch Up!",
+  "description": "A minimal renderer-free TPG starter that demonstrates host shared state and controller player state.",
+  "surfaces": [
+    {
+      "id": "host",
+      "kind": "host-display",
+      "entry": "/host.html",
+      "required": true
+    },
+    {
+      "id": "controller",
+      "kind": "controller",
+      "entry": "/controller.html",
+      "required": true
+    }
+  ],
+  "capabilities": [
+    "chat"
+  ],
+  "permissions": [],
+  "gameMetadata": {
+    "primaryCategory": "party-activity",
+    "secondaryCategories": [
+      "utility"
+    ],
+    "interactionMode": "freeform",
+    "sessionPace": "quick",
+    "playerCount": {
+      "min": 1,
+      "max": 8,
+      "recommended": 3
+    }
+  },
+  "presentationMetadata": {
+    "shortDescription": "A copyable starter for renderer-free TPG games.",
+    "longDescription": "A minimal host/controller game that uses @tpgames/game-kit for iframe runtime bootstrap, shared state, player state, and registry-ready upload scripts.",
+    "cardTitle": "Punch Up!",
+    "tags": [
+      "starter",
+      "typescript"
+    ]
+  },
+  "sessionTopology": {
+    "display": "required",
+    "supportsSpectators": false,
+    "playableParticipantModes": [
+      "controller"
+    ]
+  }
+}

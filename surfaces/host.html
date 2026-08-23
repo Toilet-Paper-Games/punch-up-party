@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TPG Starter Host</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Trebuchet MS", "Arial Rounded MT Bold", system-ui, sans-serif;
+        background: #e7f7ff;
+        color: #17202a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      main {
+        width: min(720px, 100%);
+        display: grid;
+        gap: 16px;
+      }
+
+      .panel {
+        border: 3px solid #17202a;
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 24px;
+        box-shadow: 8px 8px 0 #f4c94d;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2rem, 6vw, 4rem);
+        line-height: 1;
+      }
+
+      h2 {
+        font-size: 1rem;
+        text-transform: uppercase;
+      }
+
+      .prompt {
+        margin-top: 16px;
+        font-size: clamp(1.3rem, 3vw, 2rem);
+        font-weight: 800;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .pill {
+        border: 2px solid #17202a;
+        border-radius: 999px;
+        background: #d7f5f0;
+        padding: 6px 10px;
+        font-weight: 700;
+      }
+
+      ul {
+        display: grid;
+        gap: 8px;
+        margin: 12px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      li {
+        border: 2px solid #17202a;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 10px 12px;
+        font-weight: 700;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      button {
+        border: 3px solid #17202a;
+        border-radius: 10px;
+        background: #ff7a59;
+        color: #17202a;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+        padding: 12px 14px;
+      }
+
+      button.secondary {
+        background: #ffffff;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <h1>Starter Host</h1>
+        <p id="prompt" class="prompt">Waiting for the room to start.</p>
+        <div class="meta">
+          <span id="players" class="pill">0 controllers connected</span>
+          <span id="lifecycle" class="pill">Lifecycle: loading</span>
+        </div>
+        <div class="actions">
+          <button id="nextRound" type="button">Next round</button>
+          <button id="returnToLobby" class="secondary" type="button">Return to lobby</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Controller signals</h2>
+        <ul id="signals" aria-live="polite">
+          <li>Controller signals appear here.</li>
+        </ul>
+      </section>
+    </main>
+    <script type="module" src="../src/host.ts"></script>
+  </body>
+</html>

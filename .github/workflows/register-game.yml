@@ -1,0 +1,94 @@
+name: Register TPG Game
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      game_id:
+        description: Game id to publish
+        required: true
+        default: punch-up-party
+      version:
+        description: Version string
+        required: true
+        default: 0.1.0
+
+jobs:
+  ci_skip:
+    name: Resolve ci-skip
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      skip: ${{ steps.ci_skip.outputs.skip }}
+
+    steps:
+      - name: Resolve ci-skip commit prefix
+        id: ci_skip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT_HEAD_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          COMMIT_MESSAGE="$EVENT_HEAD_MESSAGE"
+          if [ -z "$COMMIT_MESSAGE" ]; then
+            COMMIT_MESSAGE="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA:-$GITHUB_SHA}" --jq '.commit.message' 2>/dev/null || true)"
+          fi
+          COMMIT_SUBJECT="$(printf '%s\n' "$COMMIT_MESSAGE" | sed -n '1p')"
+
+          if printf '%s' "$COMMIT_SUBJECT" | grep -Eiq '^(ci-skip:|\[ci skip\]|\[ci-skip\]|\[skip ci\]|\[skip-ci\]|\[cf-pages-skip\])'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Standalone game upload workflow skipped because the head commit subject starts with `ci-skip:` or a Cloudflare-compatible skip prefix." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  register:
+    needs: ci_skip
+    if: needs.ci_skip.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TPG_GAME_ID: ${{ inputs.game_id || 'punch-up-party' }}
+      TPG_GAME_VERSION: ${{ inputs.version || '0.1.0' }}
+      TPG_API_KEY: ${{ secrets.TPG_API_KEY }}
+    steps:
+      - name: Detect registry configuration
+        id: registry-config
+        env:
+          TPG_API_KEY: ${{ secrets.TPG_API_KEY }}
+        run: |
+          if [[ -z "$TPG_API_KEY" ]]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping registry publish because TPG_API_KEY is not configured." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v6
+        if: github.event_name == 'pull_request' || steps.registry-config.outputs.configured == 'true'
+      - uses: actions/setup-node@v6
+        if: github.event_name == 'pull_request' || steps.registry-config.outputs.configured == 'true'
+        with:
+          node-version: 24
+      - run: npm install
+        if: github.event_name == 'pull_request' || steps.registry-config.outputs.configured == 'true'
+      - run: npm run check
+        if: github.event_name == 'pull_request' || steps.registry-config.outputs.configured == 'true'
+      - name: Upload registry bundle artifact
+        if: github.event_name == 'pull_request' || steps.registry-config.outputs.configured == 'true'
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: ${{ github.event.repository.name }}-${{ env.TPG_GAME_ID }}-registry-bundle
+          path: dist/*.zip
+          if-no-files-found: error
+          retention-days: 14
+      - name: Register and publish through the TPG registry API
+        if: github.event_name != 'pull_request' && steps.registry-config.outputs.configured == 'true'
+        run: npm run register -- --mode publish --yes
