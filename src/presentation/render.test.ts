@@ -17,7 +17,7 @@ test("busy writing keeps every answer and the submit action disabled until confi
   expect(html).toContain('class="controller-page" aria-busy="true"');
   expect(html).toContain('data-writing-form aria-busy="true"');
   expect(html.match(/<textarea[^>]+disabled/g)).toHaveLength(2);
-  expect(html).toContain('<button class="primary-action" type="submit" disabled>Sending punchlines…</button>');
+  expect(html).toContain('<button class="primary-action" type="button" data-submit disabled>Sending punchlines…</button>');
 });
 
 test("busy voting disables every visible option", () => {

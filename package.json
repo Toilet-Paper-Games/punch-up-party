@@ -27,6 +27,7 @@
     "publish:dry-run": "npm run bundle && tpgames register --mode publish --dry-run",
     "publish:game": "npm run bundle && tpgames register --mode publish --yes",
     "register": "tpgames register",
+    "smoke:production": "node ./tests/production-smoke.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "validate": "npm run check:tpg-boundaries && npm run check:capabilities && npm run bundle && tpg validate ./dist"

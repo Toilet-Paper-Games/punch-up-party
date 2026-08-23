@@ -23,11 +23,13 @@ function setup(authority = true) {
 }
 
 test("authority initializes exactly one deterministic session and advances it from the fake clock", async () => {
-  const { clock, coordinator, runtime } = setup();
+  const { clock, coordinator, issues, runtime } = setup();
   coordinator.start();
+  coordinator.maybeInitialize();
   await coordinator.whenIdle();
   expect(runtime.sharedWrites).toHaveLength(1);
   expect(runtime.shared.value?.phase).toBe("instructions");
+  expect(issues).toEqual([]);
 
   coordinator.maybeInitialize();
   await coordinator.whenIdle();
@@ -39,16 +41,29 @@ test("authority initializes exactly one deterministic session and advances it fr
   coordinator.stop();
 });
 
-test("stale runtime revisions are recorded as explicit issues and do not overwrite canonical state", async () => {
+test("a stale runtime revision rebases once and preserves the incoming action", async () => {
   const { coordinator, issues, runtime } = setup();
   coordinator.start();
   await coordinator.whenIdle();
-  const canonical = runtime.shared.value;
-  runtime.rejections.push({ status: "rejected", revision: runtime.shared.revision, reason: "stale-revision", message: "Revision moved" });
+  runtime.shared = { value: runtime.shared.value, revision: runtime.shared.revision + 1 };
   coordinator.receive({ type: "connection", intentId: "disconnect", now: 2_000, playerId: "player-5", connected: false });
   await coordinator.whenIdle();
-  expect(runtime.shared.value).toBe(canonical);
-  expect(issues).toContainEqual({ kind: "runtime-rejection", code: "stale-revision", message: "Revision moved" });
+  expect(runtime.shared.value?.players["player-5"].connected).toBe(false);
+  expect(issues).toEqual([]);
+  coordinator.stop();
+});
+
+test("a repeated stale runtime rejection is surfaced after the bounded retry", async () => {
+  const { coordinator, issues, runtime } = setup();
+  coordinator.start();
+  await coordinator.whenIdle();
+  runtime.rejections.push(
+    { status: "rejected", revision: runtime.shared.revision, reason: "stale-revision", message: "Revision moved" },
+    { status: "rejected", revision: runtime.shared.revision, reason: "stale-revision", message: "Revision moved again" }
+  );
+  coordinator.receive({ type: "connection", intentId: "disconnect-twice", now: 2_000, playerId: "player-5", connected: false });
+  await coordinator.whenIdle();
+  expect(issues).toContainEqual({ kind: "runtime-rejection", code: "stale-revision", message: "Revision moved again" });
   coordinator.stop();
 });
 

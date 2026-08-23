@@ -78,7 +78,7 @@ function writingForm(view: ControllerViewModel, busy: boolean): string {
         </label>`
       )
       .join("")}
-    <button class="primary-action" type="submit"${disabled}>${busy ? "Sending punchlines…" : "Submit punchlines"}</button>
+    <button class="primary-action" type="button" data-submit${disabled}>${busy ? "Sending punchlines…" : "Submit punchlines"}</button>
   </form>`;
 }
 

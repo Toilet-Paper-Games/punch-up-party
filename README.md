@@ -20,6 +20,8 @@ The host and spectator surfaces are display-only. Controllers own every gameplay
 
 The deterministic gallery also captures the [eight-player result reveal](./docs/screenshots/finale-results-eight.png) and [mobile writing controller](./docs/screenshots/controller-writing.png).
 
+![Production round-one result on play.tp.games](./docs/screenshots/production-round-result.png)
+
 ## Architecture
 
 - `src/domain/`: pure transition engine and serializable state contract.
@@ -54,6 +56,7 @@ npm run typecheck
 npm run test
 npm run test:e2e
 npm run validate
+npm run smoke:production
 ```
 
 `npm run validate` checks runtime boundaries and capabilities, builds the game, creates the registry archive, and runs strict TPG validation. The browser journey separately asserts that host markup contains no interactive or focusable controls while the live registry is on the manifest contract that predates `displayInteraction`.
@@ -67,6 +70,8 @@ npm run publish:game
 ```
 
 The publish command registers the production archive with the TPG registry using a browser-approved CLI session or a scoped `TPG_API_KEY`. Generated archives live in `dist/` and are not committed.
+
+Published release: `punch-up-party` version `0.1.6`, discoverable as **Punch Up!** on [play.tp.games](https://play.tp.games).
 
 ## Design assets
 

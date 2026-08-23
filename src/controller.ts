@@ -14,6 +14,7 @@ const controllerRoot: HTMLElement = root;
 let session: SurfaceSession | undefined;
 let localStatus = "";
 let pendingAction: "submit" | "vote" | undefined;
+let draftAnswers: Record<string, string> = {};
 let stopListening: (() => void) | undefined;
 
 function playerName(): string {
@@ -23,18 +24,23 @@ function playerName(): string {
 
 function paint(): void {
   const snapshot = session?.snapshot();
-  const view = createControllerViewModel({
+  let view = createControllerViewModel({
     state: snapshot?.sharedState,
     playerId: session?.participantId(),
     playerName: playerName(),
     durableState: snapshot?.playerState,
-    issue: snapshot?.issue?.message ?? localStatus
+    issue: localStatus || snapshot?.issue?.message
   });
   if (
     (pendingAction === "submit" && view.scene !== "writing") ||
     (pendingAction === "vote" && view.scene !== "voting")
   ) {
     pendingAction = undefined;
+  }
+  if (view.scene === "writing") {
+    view = { ...view, submittedAnswers: { ...view.submittedAnswers, ...draftAnswers } };
+  } else {
+    draftAnswers = {};
   }
   if (view.scene === "submitted" || view.scene === "results") localStatus = "";
   controllerRoot.innerHTML = renderController(view, { busy: Boolean(pendingAction) });
@@ -51,26 +57,39 @@ function connect(api: SimpleGameApi<GameState, PlayerDurableState>): void {
   paint();
 }
 
-controllerRoot.addEventListener("submit", async (event) => {
-  if (!(event.target instanceof HTMLFormElement) || !event.target.matches("[data-writing-form]")) return;
-  event.preventDefault();
-  const form = event.target;
+async function submitWritingForm(form: HTMLFormElement): Promise<void> {
   if (pendingAction) return;
-  pendingAction = "submit";
-  localStatus = "Sending your punchlines…";
-  paint();
   const answers = Object.fromEntries(
     [...new FormData(form).entries()].map(([promptId, answer]) => [promptId, String(answer).trim()])
   );
+  pendingAction = "submit";
+  localStatus = "Sending your punchlines…";
+  paint();
   const sent = await session?.submit(answers);
   if (!sent) pendingAction = undefined;
   localStatus = sent ? "Waiting for room confirmation…" : "Unable to send. Check your connection and try again.";
   paint();
+}
+
+controllerRoot.addEventListener("submit", async (event) => {
+  if (!(event.target instanceof HTMLFormElement) || !event.target.matches("[data-writing-form]")) return;
+  event.preventDefault();
+  await submitWritingForm(event.target);
+});
+
+controllerRoot.addEventListener("input", (event) => {
+  if (!(event.target instanceof HTMLTextAreaElement) || !event.target.name) return;
+  draftAnswers = { ...draftAnswers, [event.target.name]: event.target.value };
 });
 
 controllerRoot.addEventListener("click", async (event) => {
-  const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-vote], [data-settings]") : null;
+  const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-submit], [data-vote], [data-settings]") : null;
   if (!target || !session) return;
+  if (target.hasAttribute("data-submit")) {
+    const form = target.closest<HTMLFormElement>("[data-writing-form]");
+    if (form) await submitWritingForm(form);
+    return;
+  }
   if (target.hasAttribute("data-settings")) {
     await session.openSettings();
     return;

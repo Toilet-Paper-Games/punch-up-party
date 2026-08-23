@@ -80,3 +80,13 @@
 - `npm run test:e2e -- tests/e2e/full-game.spec.ts`: passed a five-controller game through every phase, reconnect recovery, authority transfer, game over, passive-host DOM inspection, and zero page errors.
 - `npm run validate`: boundaries, capability envelope, production build, 2.7 MB archive, and strict local bundle validation passed.
 - `npm run publish:dry-run`: the live registry accepted `punch-up-party` version `0.1.0` in publish mode.
+
+## 2026-08-23 — Production room verification
+
+- Published iterative patch versions while testing the real production transport; the final verified release is `punch-up-party@0.1.6`.
+- Production exposed behavior the deterministic workbench did not: a controller repaint could occur between typing and native form submission, clearing uncontrolled textarea values; separately delivered state and revision reads could also render an older snapshot; and concurrent revisions needed a bounded rebase.
+- Resolution: controller drafts persist locally by prompt until canonical confirmation, the explicit submit control uses delegated click handling compatible with the deployed iframe sandbox, shared state is read as one atomic revisioned snapshot, and stale canonical writes rebase once before surfacing a conflict.
+- Reproduction proof: `npm run smoke:production` created room `7Z2UKS` on [play.tp.games](https://play.tp.games), joined three isolated controllers, discovered and launched Punch Up! `0.1.6`, submitted six answers, completed all three round-one votes and results, and reached the round-two break.
+- Production assertions: the host loaded from `https://tpg-registry.tp-games.workers.dev/published-assets/punch-up-party/0.1.6/host.html`, contained zero interactive/focusable elements, and all four outer pages reported zero page errors.
+- Evidence: [production result](./screenshots/production-round-result.png) and [production round break](./screenshots/production-round-break.png).
+- Existing platform issue [#938 — align Workbench role and iframe sandbox contracts with production](https://github.com/Toilet-Paper-Games/Toilet-Paper-Games/issues/938) already covered the native-form mismatch, so the independent Punch Up! reproduction and successful explicit-click workaround were added there.

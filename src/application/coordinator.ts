@@ -31,6 +31,7 @@ export class GameCoordinator {
     completion: Promise<void>;
     resolve: () => void;
   } | undefined;
+  private initializationQueued = false;
   private queue = Promise.resolve();
   private stopClock: (() => void) | undefined;
   private wasAuthority: boolean;
@@ -83,13 +84,14 @@ export class GameCoordinator {
   }
 
   maybeInitialize(): void {
-    if (!this.runtime.isAuthority() || this.authorityState) return;
+    if (!this.runtime.isAuthority() || this.authorityState || this.initializationQueued) return;
     const players = this.runtime.players().filter((player) => player.connected);
     if (players.length < 3 || players.length > 8) return;
     const plan = createSessionPlan(
       players.map((player) => player.id),
       this.planDependencies
     );
+    this.initializationQueued = true;
     this.receive({
       type: "initialize",
       intentId: this.planDependencies.ids.next("initialize"),
@@ -153,14 +155,19 @@ export class GameCoordinator {
     return true;
   }
 
-  private async apply(command: GameCommand): Promise<void> {
-    if (!this.runtime.isAuthority()) return;
+  private async apply(command: GameCommand, allowStaleRetry = true): Promise<void> {
+    if (!this.runtime.isAuthority()) {
+      if (command.type === "initialize") this.initializationQueued = false;
+      return;
+    }
     const base = this.authorityState ?? this.runtime.sharedSnapshot().value;
     const authoritativeCommand = command.type === "initialize"
       ? command
       : { ...command, now: this.clock.now() };
     const result: TransitionResult = transition(base, authoritativeCommand);
     if (!result.ok) {
+      if (command.type === "initialize") this.initializationQueued = false;
+      if (command.type === "initialize" && result.code === "already-initialized") return;
       // Player intents deliberately travel over durable state and broadcast; the
       // second arrival is an acknowledged delivery, not a user-facing failure.
       if (result.code === "duplicate-intent") return;
@@ -176,10 +183,17 @@ export class GameCoordinator {
     this.pendingCanonicalWrite = pending;
     const write = await this.runtime.writeSharedState(result.state, this.authorityRevision);
     if (write.status === "rejected") {
+      if (command.type === "initialize") this.initializationQueued = false;
       if (this.pendingCanonicalWrite === pending) this.pendingCanonicalWrite = undefined;
       const snapshot = this.runtime.sharedSnapshot();
       this.authorityState = snapshot.value;
       this.authorityRevision = snapshot.revision;
+      if (snapshot.value?.processedIntentIds.includes(command.intentId)) return;
+      if (command.type === "initialize" && snapshot.value) return;
+      if (allowStaleRetry && write.reason === "stale-revision") {
+        await this.apply(command, false);
+        return;
+      }
       this.onIssue({
         kind: "runtime-rejection",
         code: write.reason,
@@ -193,10 +207,12 @@ export class GameCoordinator {
         this.observeConfirmedState(snapshot.value, snapshot.revision);
       }
       await completion;
+      if (command.type === "initialize") this.initializationQueued = false;
       return;
     }
     if (this.pendingCanonicalWrite === pending) this.pendingCanonicalWrite = undefined;
     this.authorityState = result.state;
     if (write.revision !== undefined) this.authorityRevision = write.revision;
+    if (command.type === "initialize") this.initializationQueued = false;
   }
 }

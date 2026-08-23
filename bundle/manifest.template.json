@@ -1,7 +1,7 @@
 {
   "manifestVersion": "1",
   "gameId": "punch-up-party",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "sdkVersion": "1.0.0",
   "title": "Punch Up!",
   "description": "Write the line, win the room, and earn top billing in a fast comedy showdown.",

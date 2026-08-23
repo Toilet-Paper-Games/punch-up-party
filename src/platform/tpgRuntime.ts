@@ -135,10 +135,12 @@ export function createSurfaceSession(
   const port = new TpgRuntimePort(api);
   const ids = new SystemIdGenerator();
   const clock = new SystemClock();
+  const initialSharedSnapshot = api.getSharedStateSnapshot();
+  let confirmedSharedRevision = initialSharedSnapshot.revision;
   let current: SurfaceSnapshot = {
     lifecycle: "boot",
     participants: api.participants(),
-    sharedState: isGameState(api.getSharedState()) ? api.getSharedState() : undefined,
+    sharedState: isGameState(initialSharedSnapshot.value) ? initialSharedSnapshot.value : undefined,
     playerState: isPlayerDurableState(api.getPlayerState()) ? api.getPlayerState() : undefined
   };
   const listeners = new Set<(snapshot: SurfaceSnapshot) => void>();
@@ -158,10 +160,13 @@ export function createSurfaceSession(
       update({ participants });
       coordinator.syncConnections();
     }),
-    api.subscribeSharedState((sharedState) => {
-      const confirmed = isGameState(sharedState) ? sharedState : undefined;
+    api.subscribeSharedState(() => {
+      const snapshot = api.getSharedStateSnapshot();
+      if (snapshot.revision < confirmedSharedRevision) return;
+      confirmedSharedRevision = snapshot.revision;
+      const confirmed = isGameState(snapshot.value) ? snapshot.value : undefined;
       update({ sharedState: confirmed });
-      coordinator.observeConfirmedState(confirmed, api.getSharedStateSnapshot().revision);
+      coordinator.observeConfirmedState(confirmed, snapshot.revision);
     }),
     api.subscribePlayerState((participantId, playerState) => {
       if (!isPlayerDurableState(playerState)) return;
