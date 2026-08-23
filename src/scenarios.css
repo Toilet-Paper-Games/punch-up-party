@@ -1,0 +1,75 @@
+.gallery-body {
+  background: #2a2926;
+}
+
+.gallery-toolbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 0.8rem 1rem;
+  background: #fff;
+  color: #17140f;
+  box-shadow: 0 2px 0 #17140f;
+  font-family: Arial, sans-serif;
+}
+
+.gallery-toolbar > div {
+  display: grid;
+}
+
+.gallery-toolbar span {
+  font-size: 0.75rem;
+}
+
+.gallery-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.gallery-toolbar select {
+  min-height: 2.4rem;
+  border: 2px solid #17140f;
+  background: #fff;
+  font: inherit;
+}
+
+.gallery-stage {
+  min-height: calc(100vh - 4rem);
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  overflow: auto;
+}
+
+#scenario-root[data-surface="host"],
+#scenario-root[data-surface="spectator"] {
+  width: min(96vw, 1280px);
+  aspect-ratio: 16 / 9;
+  overflow: auto;
+  box-shadow: 0 24px 80px #0009;
+}
+
+#scenario-root[data-surface="host"] .host-scene,
+#scenario-root[data-surface="spectator"] .host-scene {
+  height: 100%;
+  min-height: 100%;
+}
+
+#scenario-root[data-surface="host"] .script-page,
+#scenario-root[data-surface="spectator"] .script-page {
+  min-height: 0;
+}
+
+#scenario-root[data-surface="controller"] {
+  width: min(100%, 360px);
+  height: min(780px, calc(100vh - 8rem));
+  overflow: auto;
+  box-shadow: 0 24px 80px #0009;
+}

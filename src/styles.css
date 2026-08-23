@@ -1,0 +1,777 @@
+@font-face {
+  font-family: "Anton";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/anton-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Barlow Condensed";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Courier Prime";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/courier-prime-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Courier Prime";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./assets/fonts/courier-prime-latin-700-normal.woff2") format("woff2");
+}
+
+:root {
+  color-scheme: light;
+  --ink: #17140f;
+  --paper: #f4e8cf;
+  --paper-light: #fff9e9;
+  --blue: #0057d8;
+  --blue-dark: #003f9e;
+  --red: #d73125;
+  --status-red: #a9231a;
+  --muted: #625b4e;
+  --tape: #d7c29c;
+  --shadow: 10px 10px 0 var(--ink);
+  --radius: 14px;
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-synthesis: none;
+  background: var(--ink);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--ink);
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.host-scene {
+  height: 100vh;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 22vw);
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: clamp(1rem, 2.4vw, 2.5rem);
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.script-page,
+.score-panel,
+.controller-page {
+  position: relative;
+  background-color: var(--paper);
+  background-image: url("./assets/paper-noise.png");
+  background-repeat: repeat;
+  color: var(--ink);
+}
+
+.script-page {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  border-radius: 2px;
+  box-shadow: var(--shadow);
+  isolation: isolate;
+}
+
+.script-page::before,
+.controller-page::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: clamp(1rem, 4vw, 4rem);
+  width: 2px;
+  background: color-mix(in srgb, var(--red) 62%, transparent);
+  z-index: -1;
+}
+
+.page-header,
+.controller-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-header {
+  padding: clamp(1.1rem, 2.2vw, 2rem) clamp(1.3rem, 3vw, 3rem) 0;
+}
+
+.round-label {
+  display: inline-block;
+  color: var(--blue-dark);
+  font-family: "Courier Prime", monospace;
+  font-size: clamp(0.78rem, 1.1vw, 1rem);
+  font-weight: 800;
+  letter-spacing: 0.045em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  text-decoration: underline 3px var(--blue);
+  text-underline-offset: 0.35em;
+}
+
+.timer {
+  display: inline-grid;
+  min-width: 3.2rem;
+  min-height: 3.2rem;
+  place-items: center;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper-light);
+  font-family: "Courier Prime", monospace;
+  font-size: 1.35rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 4px 4px 0 var(--blue);
+}
+
+.page-body {
+  display: grid;
+  align-content: center;
+  gap: clamp(0.7rem, 1.35vw, 1.3rem);
+  padding: clamp(1.1rem, 2.4vw, 2.5rem) clamp(1.5rem, 4.5vw, 5rem);
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+.page-body h1,
+.controller-page h1 {
+  max-width: 15ch;
+  font-family: "Anton", sans-serif;
+  font-size: clamp(2.7rem, 5.4vw, 5.2rem);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 0.92;
+  text-wrap: balance;
+  text-transform: uppercase;
+}
+
+.direction {
+  max-width: 62ch;
+  color: var(--muted);
+  font-family: "Courier Prime", monospace;
+  font-size: clamp(0.95rem, 1.35vw, 1.2rem);
+  font-weight: 700;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.direction::before {
+  content: "(";
+}
+
+.direction::after {
+  content: ")";
+}
+
+.scene-heading {
+  max-width: 38ch;
+  padding-block: 0.85rem;
+  border-block: 3px solid var(--ink);
+  font-family: "Courier Prime", monospace;
+  font-size: clamp(1.2rem, 2vw, 1.85rem);
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.progress-copy {
+  justify-self: start;
+  transform: rotate(-1.5deg);
+  padding: 0.65rem 0.85rem;
+  background: var(--blue);
+  color: #fff;
+  font-family: "Courier Prime", monospace;
+  font-size: clamp(1rem, 1.7vw, 1.4rem);
+  font-weight: 900;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.answer-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: clamp(0.7rem, 1.4vw, 1.4rem);
+}
+
+.answer-stage--many {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: center;
+  gap: clamp(0.3rem, 0.55vw, 0.55rem);
+}
+
+.answer-stage--many .answer-slip {
+  min-height: 0;
+  gap: 0.3rem;
+  padding: clamp(0.5rem, 0.8vw, 0.7rem) clamp(0.8rem, 1.4vw, 1.15rem);
+  padding-inline-start: clamp(2rem, 2.8vw, 2.7rem);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.answer-stage--many .answer-slip p {
+  font-size: clamp(0.95rem, 1.16vw, 1.18rem);
+  line-height: 1.18;
+}
+
+.answer-stage--many.answer-stage--long .answer-slip p {
+  font-size: clamp(0.76rem, 0.92vw, 0.92rem);
+}
+
+.answer-stage--many .answer-slip footer {
+  padding-block-start: 0.2rem;
+  font-size: clamp(0.66rem, 0.78vw, 0.8rem);
+}
+
+.host-scene--many .page-header {
+  padding-block-start: clamp(0.7rem, 1.1vw, 1rem);
+}
+
+.host-scene--many .page-body {
+  align-content: start;
+  gap: clamp(0.25rem, 0.5vw, 0.45rem);
+  padding-block: clamp(0.35rem, 0.7vw, 0.65rem);
+}
+
+.host-scene--many .page-body h1,
+.host-scene--long .page-body h1 {
+  font-size: clamp(2rem, 3.2vw, 3rem);
+}
+
+.host-scene--many .direction,
+.host-scene--long .direction {
+  font-size: clamp(0.78rem, 1vw, 0.95rem);
+  line-height: 1.3;
+}
+
+.host-scene--many .scene-heading,
+.host-scene--long .scene-heading {
+  padding-block: 0.45rem;
+  font-size: clamp(0.9rem, 1.35vw, 1.25rem);
+}
+
+.answer-stage--long:not(.answer-stage--many) .answer-slip {
+  min-height: 0;
+  gap: 0.55rem;
+  padding: clamp(0.85rem, 1.4vw, 1.25rem);
+  padding-inline-start: clamp(2.1rem, 3vw, 2.8rem);
+}
+
+.answer-stage--long:not(.answer-stage--many) .answer-slip p {
+  font-size: clamp(0.78rem, 1.05vw, 1.02rem);
+  line-height: 1.18;
+}
+
+.answer-slip {
+  position: relative;
+  min-height: clamp(7.5rem, 18vh, 11.5rem);
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+  padding: clamp(1.2rem, 2.5vw, 2.4rem);
+  background: var(--paper-light);
+  box-shadow: 7px 7px 0 var(--ink);
+  clip-path: polygon(1% 2%, 98% 0, 100% 96%, 96% 100%, 2% 98%, 0 5%);
+}
+
+.answer-slip::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -0.3rem;
+  inset-inline-start: 42%;
+  width: 4.5rem;
+  height: 1.2rem;
+  transform: rotate(-4deg);
+  background: color-mix(in srgb, var(--tape) 78%, transparent);
+}
+
+.answer-slip--winner {
+  background: var(--blue);
+  color: #fff;
+}
+
+.answer-slip p {
+  font-family: "Courier Prime", monospace;
+  font-size: clamp(1.1rem, 1.7vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.answer-letter {
+  position: absolute;
+  inset-block-start: 0.7rem;
+  inset-inline-start: 0.85rem;
+  color: var(--blue);
+  font-family: "Anton", sans-serif;
+  font-size: 1.2rem;
+}
+
+.answer-slip--winner .answer-letter {
+  color: #fff;
+}
+
+.answer-slip footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-block-start: 2px solid currentColor;
+  padding-block-start: 0.65rem;
+  font-family: "Courier Prime", monospace;
+  font-size: clamp(0.85rem, 1.25vw, 1rem);
+  text-transform: uppercase;
+}
+
+.versus {
+  align-self: center;
+  color: var(--red);
+  font-family: "Anton", sans-serif;
+  font-size: clamp(1.8rem, 4vw, 4rem);
+  transform: rotate(-7deg);
+}
+
+.result-stamp {
+  position: absolute;
+  inset-block-start: clamp(5rem, 10vh, 8rem);
+  inset-inline-end: clamp(1.4rem, 4vw, 4rem);
+  transform: rotate(7deg);
+  border: 0.28rem solid var(--red);
+  padding: 0.35rem 0.65rem 0.2rem;
+  color: var(--red);
+  font-family: "Anton", sans-serif;
+  font-size: clamp(1.35rem, 3.2vw, 3rem);
+  letter-spacing: 0.03em;
+  line-height: 1;
+  opacity: 0.9;
+  text-transform: uppercase;
+  animation: stamp-in 320ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.billing-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem clamp(1.3rem, 3vw, 3rem);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: "Barlow Condensed", Arial, sans-serif;
+  font-size: clamp(0.62rem, 0.85vw, 0.82rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.score-panel {
+  align-self: start;
+  max-height: calc(100vh - 5rem);
+  overflow: hidden;
+  padding: clamp(1rem, 2vw, 1.7rem);
+  box-shadow: 7px 7px 0 var(--blue);
+}
+
+.score-panel:not(:has(.scoreboard)) {
+  display: none;
+}
+
+.score-panel h2 {
+  margin-block-end: 1rem;
+  font-family: "Anton", sans-serif;
+  font-size: clamp(1.55rem, 2.8vw, 2.4rem);
+  letter-spacing: -0.015em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.scoreboard {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.65rem;
+  border-block-end: 2px solid var(--ink);
+  font-family: "Courier Prime", monospace;
+  font-size: clamp(0.82rem, 1.2vw, 1rem);
+  font-weight: 800;
+}
+
+.score-row--winner {
+  background: var(--blue);
+  color: #fff;
+  padding-inline: 0.4rem;
+  transform: rotate(-0.8deg);
+}
+
+.score-row--offline {
+  opacity: 0.55;
+}
+
+.score-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-points {
+  font-variant-numeric: tabular-nums;
+}
+
+.controller-scene {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1rem;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  background: var(--ink);
+}
+
+.controller-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 3;
+  padding-block: 0.5rem;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.controller-header > div {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.controller-header > div > strong {
+  max-width: 16rem;
+  overflow: hidden;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controller-header .round-label {
+  color: #8fbaff;
+}
+
+.controller-header .timer {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.controller-page {
+  width: min(100%, 36rem);
+  min-height: 0;
+  justify-self: center;
+  align-self: start;
+  display: grid;
+  align-content: start;
+  gap: 1.2rem;
+  padding: clamp(1.25rem, 5vw, 2.2rem);
+  padding-inline-start: clamp(2.4rem, 12vw, 4.2rem);
+  box-shadow: 7px 7px 0 var(--blue);
+}
+
+.controller-page h1 {
+  font-size: clamp(2.3rem, 11vw, 4.4rem);
+}
+
+.controller-scene--voting .controller-page h1 {
+  font-size: clamp(1.9rem, 8vw, 3.2rem);
+}
+
+.controller-page .direction {
+  font-size: 1rem;
+}
+
+.writing-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.prompt-field {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.prompt-field strong {
+  font-family: "Courier Prime", monospace;
+  font-size: 1.02rem;
+  line-height: 1.4;
+}
+
+.prompt-number,
+.field-note {
+  color: var(--blue-dark);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.field-note {
+  color: var(--muted);
+  text-align: end;
+}
+
+textarea {
+  width: 100%;
+  min-height: 7rem;
+  resize: vertical;
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper-light);
+  color: var(--ink);
+  padding: 0.9rem;
+  font-family: "Courier Prime", monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+textarea::placeholder {
+  color: #746b5d;
+}
+
+.primary-action,
+.vote-option,
+.settings-action {
+  min-height: 3.25rem;
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  cursor: pointer;
+  font-weight: 900;
+  transition-property: transform, box-shadow, background-color, color;
+  transition-duration: 120ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.primary-action {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 5px 5px 0 var(--ink);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+}
+
+.vote-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.vote-option {
+  display: grid;
+  grid-template-columns: 2.3rem 1fr;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 6rem;
+  padding: 0.9rem;
+  background: var(--paper-light);
+  color: var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+  text-align: start;
+}
+
+.vote-option span {
+  color: var(--blue);
+  font-family: "Anton", sans-serif;
+  font-size: 2rem;
+}
+
+.vote-option strong {
+  font-family: "Courier Prime", monospace;
+  font-size: 1rem;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
+
+.settings-action {
+  width: min(100%, 36rem);
+  justify-self: center;
+  border-color: var(--paper);
+  background: transparent;
+  color: var(--paper);
+}
+
+.primary-action:hover,
+.vote-option:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.settings-action:hover {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.primary-action:active,
+.vote-option:active,
+.settings-action:active {
+  transform: scale(0.96);
+}
+
+.primary-action:disabled,
+.vote-option:disabled {
+  cursor: wait;
+  opacity: 0.58;
+  transform: none;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+button:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #78a9ff;
+  outline-offset: 4px;
+}
+
+.waiting-mark {
+  width: 5.5rem;
+  height: 5.5rem;
+  display: grid;
+  place-items: center;
+  transform: rotate(-8deg);
+  border: 0.35rem solid var(--blue);
+  border-radius: 50%;
+  color: var(--blue);
+  font-family: "Anton", sans-serif;
+  font-size: 3.4rem;
+}
+
+.status-line {
+  margin-inline: -0.45rem;
+  padding: 0.55rem 0.65rem;
+  background: var(--status-red);
+  color: #fff;
+  font-family: "Courier Prime", monospace;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.scoreboard--compact {
+  gap: 0.3rem;
+}
+
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(7deg) scale(1.18);
+  }
+  to {
+    opacity: 0.9;
+    transform: rotate(7deg) scale(1);
+  }
+}
+
+@media (max-width: 760px) {
+  .host-scene {
+    height: auto;
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .script-page {
+    min-height: calc(100vh - 2rem);
+  }
+
+  .score-panel {
+    max-height: none;
+  }
+
+  .answer-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .versus {
+    justify-self: center;
+  }
+
+  .page-body {
+    padding-inline: 2rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .controller-scene {
+    padding-inline: 0.75rem;
+  }
+
+  .controller-page {
+    padding-inline: 2.1rem 1rem;
+  }
+
+  .controller-page h1 {
+    font-size: 2.2rem;
+  }
+
+  .timer {
+    min-width: 2.8rem;
+    min-height: 2.8rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .script-page,
+  .score-panel,
+  .controller-page,
+  .answer-slip,
+  .primary-action,
+  .vote-option {
+    border: 2px solid CanvasText;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-stamp {
+    animation: none;
+  }
+
+  .primary-action,
+  .vote-option,
+  .settings-action {
+    transition-duration: 1ms;
+  }
+}

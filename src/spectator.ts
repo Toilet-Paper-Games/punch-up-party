@@ -8,18 +8,18 @@ import { createHostViewModel } from "./presentation/viewModels";
 import { updateRenderedTimer } from "./presentation/liveTimer";
 
 const root = document.getElementById("app");
-if (!root) throw new Error("Missing #app host root.");
-const hostRoot: HTMLElement = root;
+if (!root) throw new Error("Missing #app spectator root.");
+const spectatorRoot: HTMLElement = root;
 
 let session: SurfaceSession | undefined;
 let stopListening: (() => void) | undefined;
 
 function paint(): void {
-  hostRoot.innerHTML = renderHost(createHostViewModel(session?.snapshot().sharedState));
+  spectatorRoot.innerHTML = renderHost(createHostViewModel(session?.snapshot().sharedState), true);
 }
 
 function updateTimer(): void {
-  updateRenderedTimer(hostRoot, session?.snapshot().sharedState);
+  updateRenderedTimer(spectatorRoot, session?.snapshot().sharedState);
 }
 
 function connect(api: SimpleGameApi<GameState, PlayerDurableState>): void {
@@ -31,13 +31,19 @@ function connect(api: SimpleGameApi<GameState, PlayerDurableState>): void {
 
 const game = defineSimpleGame<GameState, PlayerDurableState>({
   boot: connect,
+  ready: connect,
   surfacesReady: connect,
   started: connect
 });
 
 connect(
   bootIframeGame(game, {
-    context: { surfaceId: "host", surfaceKind: "host-display", isAuthority: true },
+    context: {
+      surfaceId: "spectator",
+      surfaceKind: "spectator",
+      participantId: "punch-up-spectator",
+      isAuthority: false
+    },
     initialSettings: { volume: 0.8 }
   })
 );

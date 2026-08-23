@@ -8,9 +8,18 @@ export default defineConfig({
       title: "Punch Up!",
       surfaces: {
         host: "/surfaces/host.html",
-        controller: "/surfaces/controller.html"
+        controller: "/surfaces/controller.html",
+        spectator: "/surfaces/spectator.html"
       },
-      controllers: 2
+      controllers: [
+        { id: "avery", screenName: "Avery" },
+        { id: "blake", screenName: "Blake" },
+        { id: "casey", screenName: "Casey" },
+        { id: "devon", screenName: "Devon" },
+        { id: "ellis", screenName: "Ellis" }
+      ],
+      spectator: true,
+      networkProfile: { latencyMs: 80, jitterMs: 20, reconnectDelayMs: 1_500, seed: 42 }
     })
   ],
   build: {
@@ -20,7 +29,8 @@ export default defineConfig({
     lib: {
       entry: {
         controller: resolve(import.meta.dirname, "src/controller.ts"),
-        host: resolve(import.meta.dirname, "src/host.ts")
+        host: resolve(import.meta.dirname, "src/host.ts"),
+        spectator: resolve(import.meta.dirname, "src/spectator.ts")
       },
       formats: ["es"]
     },

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Punch Up! scenario gallery</title>
+    <link rel="icon" href="../src/assets/card-art.png" />
+    <link rel="stylesheet" href="../src/styles.css" />
+    <link rel="stylesheet" href="../src/scenarios.css" />
+  </head>
+  <body class="gallery-body">
+    <header class="gallery-toolbar">
+      <div><strong>Punch Up! scenarios</strong><span>Deterministic phase gallery</span></div>
+      <label>Surface <select id="surface"><option value="host">Host · 16:9</option><option value="controller">Controller · 360×780</option><option value="spectator">Spectator · 16:9</option></select></label>
+      <label>State <select id="scenario"><option>waiting</option><option>instructions</option><option>writing</option><option>submitted</option><option>voting</option><option>voting-active</option><option>results</option><option>round-break</option><option>reconnecting</option><option>finale</option><option>finale-voting</option><option>finale-results</option><option>finale-voting-8</option><option>finale-results-8</option><option>finale-voting-8-long</option><option>long-voting</option><option>game-over</option></select></label>
+    </header>
+    <main class="gallery-stage"><div id="scenario-root"></div></main>
+    <script type="module" src="../src/scenarios.ts"></script>
+  </body>
+</html>

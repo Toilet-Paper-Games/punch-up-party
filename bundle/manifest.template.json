@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "sdkVersion": "1.0.0",
   "title": "Punch Up!",
-  "description": "A minimal renderer-free TPG starter that demonstrates host shared state and controller player state.",
+  "description": "Write the line, win the room, and earn top billing in a fast comedy showdown.",
   "surfaces": [
     {
       "id": "host",
@@ -17,37 +17,54 @@
       "kind": "controller",
       "entry": "/controller.html",
       "required": true
+    },
+    {
+      "id": "spectator",
+      "kind": "spectator",
+      "entry": "/spectator.html",
+      "required": false
     }
   ],
   "capabilities": [
-    "chat"
+    "player-state",
+    "shared-state",
+    "broadcast-messages"
   ],
   "permissions": [],
   "gameMetadata": {
     "primaryCategory": "party-activity",
     "secondaryCategories": [
-      "utility"
+      "word"
     ],
-    "interactionMode": "freeform",
+    "interactionMode": "competitive",
     "sessionPace": "quick",
     "playerCount": {
-      "min": 1,
+      "min": 3,
       "max": 8,
-      "recommended": 3
+      "recommended": 5
     }
   },
   "presentationMetadata": {
-    "shortDescription": "A copyable starter for renderer-free TPG games.",
-    "longDescription": "A minimal host/controller game that uses @tpgames/game-kit for iframe runtime bootstrap, shared state, player state, and registry-ready upload scripts.",
-    "cardTitle": "Punch Up!",
+    "shortDescription": "Write the line. Win the room.",
+    "longDescription": "Turn ridiculous comedy setups into punchlines, face off anonymously, and vote for the lines that deserve top billing across two duel rounds and a triple-point finale.",
+    "cardTitle": "PUNCH UP!",
     "tags": [
-      "starter",
-      "typescript"
-    ]
+      "comedy",
+      "party",
+      "voting",
+      "word-game"
+    ],
+    "legacyCategories": ["2d", "word-games"],
+    "artwork": {
+      "thumbnail": "assets/card-art.png",
+      "card": "assets/card-art.png"
+    },
+    "launchColor": "#F4E8CF",
+    "estimatedDurationMinutes": 12
   },
   "sessionTopology": {
     "display": "required",
-    "supportsSpectators": false,
+    "supportsSpectators": true,
     "playableParticipantModes": [
       "controller"
     ]

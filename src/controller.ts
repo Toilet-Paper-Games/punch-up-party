@@ -1,133 +1,113 @@
-import {
-  bootIframeGame,
-  defineSimpleGame,
-  type RuntimeParticipant,
-  type SimpleGameApi
-} from "@tpgames/game-kit";
+import { bootIframeGame, defineSimpleGame, type SimpleGameApi } from "@tpgames/game-kit";
 
-import type { StarterPlayerState, StarterSignal, StarterSharedState } from "./game";
+import type { GameState } from "./domain/types";
+import type { PlayerDurableState } from "./ports";
+import { createSurfaceSession, type SurfaceSession } from "./platform/tpgRuntime";
+import { renderController } from "./presentation/render";
+import { createControllerViewModel } from "./presentation/viewModels";
+import { updateRenderedTimer } from "./presentation/liveTimer";
 
-const elements = {
-  player: requireElement("player"),
-  lifecycle: requireElement("lifecycle"),
-  prompt: requireElement("prompt"),
-  status: requireElement("status"),
-  ready: requireButton("ready"),
-  wild: requireButton("wild"),
-  stuck: requireButton("stuck"),
-  settings: requireButton("settings")
-};
+const root = document.getElementById("app");
+if (!root) throw new Error("Missing #app controller root.");
+const controllerRoot: HTMLElement = root;
 
-let runtimeApi: SimpleGameApi<StarterSharedState, StarterPlayerState> | undefined;
-let runtimeConnected = false;
-let participant: RuntimeParticipant | undefined;
+let session: SurfaceSession | undefined;
+let localStatus = "";
+let pendingAction: "submit" | "vote" | undefined;
+let stopListening: (() => void) | undefined;
 
-function requireElement(id: string): HTMLElement {
-  const element = document.getElementById(id);
-  if (!element) {
-    throw new Error(`Missing #${id} element.`);
-  }
-  return element;
+function playerName(): string {
+  const participant = session?.snapshot().participants.find((candidate) => candidate.id === session?.participantId());
+  return participant?.screenName ?? "Writer";
 }
 
-function requireButton(id: string): HTMLButtonElement {
-  const element = requireElement(id);
-  if (!(element instanceof HTMLButtonElement)) {
-    throw new Error(`#${id} must be a button.`);
-  }
-  return element;
-}
-
-function renderPlayer() {
-  elements.player.textContent = participant?.screenName ?? "Controller";
-}
-
-function renderSharedState(sharedState: StarterSharedState | undefined) {
-  elements.prompt.textContent = sharedState
-    ? `Round ${sharedState.round}: ${sharedState.prompt}`
-    : "Waiting for the host to start.";
-}
-
-function connectRuntime(api: SimpleGameApi<StarterSharedState, StarterPlayerState>) {
-  runtimeApi = api;
-  participant = api.me();
-  renderPlayer();
-  renderSharedState(api.getSharedState());
-  elements.lifecycle.textContent = `Lifecycle: boot`;
-
-  if (runtimeConnected) {
-    return;
-  }
-  runtimeConnected = true;
-
-  api.subscribeLifecycle((lifecycle) => {
-    elements.lifecycle.textContent = `Lifecycle: ${lifecycle}`;
+function paint(): void {
+  const snapshot = session?.snapshot();
+  const view = createControllerViewModel({
+    state: snapshot?.sharedState,
+    playerId: session?.participantId(),
+    playerName: playerName(),
+    durableState: snapshot?.playerState,
+    issue: snapshot?.issue?.message ?? localStatus
   });
-  api.subscribeParticipants(() => {
-    participant = api.me();
-    renderPlayer();
-  });
-  api.subscribeSharedState((sharedState) => {
-    renderSharedState(sharedState);
-  });
-
-  void api.reportLoading(true);
+  if (
+    (pendingAction === "submit" && view.scene !== "writing") ||
+    (pendingAction === "vote" && view.scene !== "voting")
+  ) {
+    pendingAction = undefined;
+  }
+  if (view.scene === "submitted" || view.scene === "results") localStatus = "";
+  controllerRoot.innerHTML = renderController(view, { busy: Boolean(pendingAction) });
 }
 
-async function sendSignal(signal: StarterSignal) {
-  if (!runtimeApi) {
-    return;
-  }
-
-  await runtimeApi.setPlayerState({
-    signal,
-    sentAt: Date.now()
-  });
-  await runtimeApi.reportAnalytics({
-    type: "milestone.reached",
-    name: "game.milestone",
-    dimensions: {
-      milestone: "starter-signal",
-      signal
-    },
-    metrics: {
-      count: 1
-    }
-  });
-  elements.status.textContent = `Sent: ${signal}`;
+function updateTimer(): void {
+  updateRenderedTimer(controllerRoot, session?.snapshot().sharedState);
 }
 
-const game = defineSimpleGame<StarterSharedState, StarterPlayerState>({
-  boot(api) {
-    connectRuntime(api);
-  },
-  ready(api) {
-    connectRuntime(api);
-  }
+function connect(api: SimpleGameApi<GameState, PlayerDurableState>): void {
+  if (session) return;
+  session = createSurfaceSession(api);
+  stopListening = session.subscribe(paint);
+  paint();
+}
+
+controllerRoot.addEventListener("submit", async (event) => {
+  if (!(event.target instanceof HTMLFormElement) || !event.target.matches("[data-writing-form]")) return;
+  event.preventDefault();
+  const form = event.target;
+  if (pendingAction) return;
+  pendingAction = "submit";
+  localStatus = "Sending your punchlines…";
+  paint();
+  const answers = Object.fromEntries(
+    [...new FormData(form).entries()].map(([promptId, answer]) => [promptId, String(answer).trim()])
+  );
+  const sent = await session?.submit(answers);
+  if (!sent) pendingAction = undefined;
+  localStatus = sent ? "Waiting for room confirmation…" : "Unable to send. Check your connection and try again.";
+  paint();
 });
 
-connectRuntime(
+controllerRoot.addEventListener("click", async (event) => {
+  const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-vote], [data-settings]") : null;
+  if (!target || !session) return;
+  if (target.hasAttribute("data-settings")) {
+    await session.openSettings();
+    return;
+  }
+  const optionPlayerId = target.dataset.vote;
+  if (!optionPlayerId || pendingAction) return;
+  pendingAction = "vote";
+  localStatus = "Sending your vote…";
+  paint();
+  const sent = await session.vote(optionPlayerId);
+  if (!sent) pendingAction = undefined;
+  localStatus = sent ? "Waiting for room confirmation…" : "Unable to vote. Check your connection and try again.";
+  paint();
+});
+
+const game = defineSimpleGame<GameState, PlayerDurableState>({
+  boot: connect,
+  ready: connect,
+  surfacesReady: connect,
+  started: connect
+});
+
+connect(
   bootIframeGame(game, {
-    allowedOrigins: ["*"],
     context: {
       surfaceId: "controller",
       surfaceKind: "controller",
-      participantId: "starter-controller",
+      participantId: "punch-up-controller",
       isAuthority: false
     },
     initialSettings: { volume: 0.8 }
   })
 );
 
-elements.ready.addEventListener("click", () => {
-  void sendSignal("ready");
-});
-elements.wild.addEventListener("click", () => {
-  void sendSignal("wild");
-});
-elements.stuck.addEventListener("click", () => {
-  void sendSignal("stuck");
-});
-elements.settings.addEventListener("click", () => {
-  void runtimeApi?.openSettings();
-});
+const timerHandle = window.setInterval(updateTimer, 1_000);
+window.addEventListener("pagehide", () => {
+  window.clearInterval(timerHandle);
+  stopListening?.();
+  session?.dispose();
+}, { once: true });

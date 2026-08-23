@@ -14,17 +14,38 @@
         "to": "."
       },
       {
+        "from": "src/styles.css",
+        "to": "styles.css"
+      },
+      {
+        "from": "src/assets",
+        "to": "assets"
+      },
+      {
         "from": "surfaces/host.html",
         "to": "host.html",
         "replacements": {
-          "src=\"../src/host.ts\"": "src=\"./host.js\""
+          "src=\"../src/host.ts\"": "src=\"./host.js\"",
+          "href=\"../src/styles.css\"": "href=\"./styles.css\"",
+          "href=\"../src/assets/card-art.png\"": "href=\"./assets/card-art.png\""
         }
       },
       {
         "from": "surfaces/controller.html",
         "to": "controller.html",
         "replacements": {
-          "src=\"../src/controller.ts\"": "src=\"./controller.js\""
+          "src=\"../src/controller.ts\"": "src=\"./controller.js\"",
+          "href=\"../src/styles.css\"": "href=\"./styles.css\"",
+          "href=\"../src/assets/card-art.png\"": "href=\"./assets/card-art.png\""
+        }
+      },
+      {
+        "from": "surfaces/spectator.html",
+        "to": "spectator.html",
+        "replacements": {
+          "src=\"../src/spectator.ts\"": "src=\"./spectator.js\"",
+          "href=\"../src/styles.css\"": "href=\"./styles.css\"",
+          "href=\"../src/assets/card-art.png\"": "href=\"./assets/card-art.png\""
         }
       }
     ]
